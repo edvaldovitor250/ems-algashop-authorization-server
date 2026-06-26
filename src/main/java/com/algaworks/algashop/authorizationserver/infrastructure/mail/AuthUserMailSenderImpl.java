@@ -23,9 +23,6 @@ public class AuthUserMailSenderImpl implements AuthUserMailSender {
 	private final JavaMailSender javaMailSender;
 	private final UserAccountProperties properties;
 
-
-
-	
 	@Override
 	@Async
 	public void sendActivationEmail(AuthUser user, String token) {
