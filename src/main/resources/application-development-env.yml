@@ -86,3 +86,6 @@ spring:
                 - customers:write
             token:
               access-token-time-to-live: 15m
+logging:
+  level:
+    org.springframework.security: TRACE
