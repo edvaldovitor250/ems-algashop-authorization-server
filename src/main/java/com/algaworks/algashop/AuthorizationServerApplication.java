@@ -1,4 +1,4 @@
-package com.algaworks.algashop.authorizationserver;
+package com.algaworks.algashop;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
