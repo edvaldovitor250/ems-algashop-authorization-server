@@ -1,4 +1,4 @@
-package com.algaworks.algashop.infrastructure.security;
+package com.algaworks.algashop.infrastructure.security.password;
 
 @Configuration
 public class PasswordEncoderConfig {

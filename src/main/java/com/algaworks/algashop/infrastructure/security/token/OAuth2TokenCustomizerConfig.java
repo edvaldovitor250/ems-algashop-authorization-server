@@ -1,4 +1,4 @@
-package com.algaworks.algashop.authorizationserver.infrastructure.security;
+package com.algaworks.algashop.infrastructure.security.token;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -1,4 +1,4 @@
-package com.algaworks.algashop.infrastructure.security;
+package com.algaworks.algashop.infrastructure.security.userinfo;
 
 @Service
 @RequiredArgsConstructor
