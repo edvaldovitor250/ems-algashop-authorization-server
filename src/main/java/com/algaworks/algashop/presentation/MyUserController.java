@@ -4,9 +4,12 @@ package com.algaworks.algashop.presentation;
 @RequestMapping("/api/v1/users/me")
 public class MyUserController {
 
+    private  final SecurityCheckApplicationSerivice securityCheckApplicationSerivice;
+    private final AuthUserQueryService authUserQueryService;
+
     @GetMapping
-    public void getMe(){
-        
+    public AuthUserOutput getMe(){
+        return authUserQueryService.findById(securityCheckApplicationSerivice.getAuthenticatedUserId());
     }
     
 }
