@@ -57,6 +57,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
+     @ExceptionHandler(Exception.class)
+    public ProblemDetail handleAuthUserEmailAlreadyInUseException(Exception e) {
+        log.error(e.getMessage(), e);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problemDetail.setTitle("Email Already In Use");
+        problemDetail.setDetail("The provided email address is already in use.");
+        problemDetail.setType(URI.create("/errors/email-already-in-use"));
+        return problemDetail;
+    }
+
+
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ProblemDetail handleAuthorizationDeniedException(AuthorizationDeniedException e) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
