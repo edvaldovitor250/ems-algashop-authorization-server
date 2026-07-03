@@ -10,56 +10,66 @@ import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
-@Service
+@Service("securityCheck")
 @Slf4j
 public class OAuth2SecurityCheckApplicationServiceImpl
-        implements SecurityCheckApplicationService {
+		implements SecurityCheckApplicationService {
 
-    @Override
-    public UUID getAuthenticatedUserId() {
-        if (isMachineAuthenticated()) {
-            throw new AccessDeniedException("Machine users do not have user ID");
-        }
-        Jwt jwt = getJwt();
+	@Override
+	public UUID getAuthenticatedUserId() {
+		if (isMachineAuthenticated()) {
+			throw new AccessDeniedException("Machine users do not have user ID");
+		}
+		Jwt jwt = getJwt();
 
-        try {
-            return UUID.fromString(jwt.getSubject());
-        } catch (IllegalAccessError e) {
-            log.error("Invalid user ID in JWT subject: {}", jwt.getSubject(), e);
-            throw new AccessDeniedException("Invalid user ID in JWT subject");
-        }
-    }
+		try {
+			return UUID.fromString(jwt.getSubject());
+		} catch (IllegalAccessError e) {
+			log.error("Invalid user ID in JWT subject: {}", jwt.getSubject(), e);
+			throw new AccessDeniedException("Invalid user ID in JWT subject");
+		}
+	}
 
-    @Override
-    public boolean isAuthenticated() {
-        try {
-            return getAuthentication().isAuthenticated();
+	@Override
+	public boolean isAuthenticated() {
+		try {
+			return getAuthentication().isAuthenticated();
+		} catch (IllegalStateException e) {
+			log.debug(e.getMessage(), e);
+			return false;
+		}
+	}
 
-        } catch (IllegalStateException e) {
-            log.error("Error checking authentication status", e);
-            return false;
-        }
-    }
+	@Override
+	public boolean isMachineAuthenticated() {
+		Jwt jwt;
+		try {
+			jwt = getJwt();
+		} catch (IllegalStateException e) {
+			log.debug(e.getMessage(), e);
+			return false;
+		}
+		return jwt.getAudience().contains(jwt.getSubject());
+	}
 
-    @Override
-    public boolean isMachineAuthenticated() {
-        Jwt jwt = getJwt();
-        return jwt.getAudience().contains(jwt.getSubject());
-    }
+	@Override
+	public boolean canAccessOwnProfile() {
+		return this.isAuthenticated() && !isMachineAuthenticated();
+	}
 
-    private Jwt getJwt() {
-        Authentication authentication = getAuthentication();
-        if (authentication.getPrincipal() instanceof Jwt jwt) {
-            return jwt;
-        }
-        throw new IllegalStateException("Authentication principal is not a JWT");
-    }
+	private Jwt getJwt() {
+		Authentication authentication = getAuthentication();
+		if (authentication.getPrincipal() instanceof Jwt jwt) {
+			return jwt;
+		}
+		throw new IllegalStateException("Authentication principal is not a JWT");
+	}
 
-    private Authentication getAuthentication() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new IllegalStateException("No authentication found");
-        }
-        return authentication;
-    }
+	private Authentication getAuthentication() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null) {
+			throw new IllegalStateException("No authentication found");
+		}
+		return authentication;
+	}
 }

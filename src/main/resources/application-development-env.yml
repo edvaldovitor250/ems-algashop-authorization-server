@@ -1,7 +1,6 @@
 spring:
   session:
     store-type: jdbc
-    timeout: 30m
   datasource:
     url: jdbc:postgresql://localhost:5432/authorization_server
     username: postgres
@@ -43,7 +42,8 @@ spring:
                 - customers:write
                 - shopping-carts:read
                 - shopping-carts:write
-                - openid
+                - users:read
+                - users:write
             token:
               access-token-time-to-live: 15m
               access-token-format: self-contained # JWT
@@ -74,8 +74,7 @@ spring:
                 - http://algashop-ecommerce:9080/login/oauth2/code/algashop-ecommerce-web
                 - https://oauth.pstmn.io/v1/callback
               post-logout-redirect-uris:
-              - http://algashop-ecommerce:9080/  
-              
+                - http://algashop-ecommerce:9080?logout-success
               scopes:
                 - credit-cards:read
                 - credit-cards:write
@@ -85,6 +84,7 @@ spring:
                 - customers:write
                 - shopping-carts:read
                 - shopping-carts:write
+                - openid
             require-authorization-consent: true
             require-proof-key: false #PKCE
             token:
@@ -106,18 +106,6 @@ spring:
                 - customers:write
             token:
               access-token-time-to-live: 15m
-      management:
-  info:
-    env.enabled: true
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
-info:
-  app.name: AlgaShop Authorization Server
 
 
 logging:
