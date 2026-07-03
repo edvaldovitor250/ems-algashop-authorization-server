@@ -1,5 +1,7 @@
 package com.algaworks.algashop.authorizationserver.presentation;
 
+import com.algaworks.algashop.authorizationserver.application.user.management.AuthUserEmailAlreadyInUseException;
+import com.algaworks.algashop.authorizationserver.application.user.query.AuthUserNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -47,29 +49,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return super.handleExceptionInternal(ex, problemDetail, headers, status, request);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ProblemDetail handleException(Exception e) {
-        log.error(e.getMessage(), e);
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        problemDetail.setTitle("Internal Server Error");
-        problemDetail.setDetail("An unexpected internal error occurred.");
-        problemDetail.setType(URI.create("/errors/internal"));
-        return problemDetail;
-    }
-
-     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleAuthUserEmailAlreadyInUseException(Exception e) {
-        log.error(e.getMessage(), e);
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
-        problemDetail.setTitle("Email Already In Use");
-        problemDetail.setDetail("The provided email address is already in use.");
-        problemDetail.setType(URI.create("/errors/email-already-in-use"));
-        return problemDetail;
-    }
-
-
-     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleAuthUserNotFoundException(Exception e) {
+    @ExceptionHandler(AuthUserNotFoundException.class)
+    public ProblemDetail handleAuthUserNotFoundException(AuthUserNotFoundException e) {
         log.error(e.getMessage(), e);
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problemDetail.setTitle("User Not Found");
@@ -78,7 +59,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
-
+    @ExceptionHandler(AuthUserEmailAlreadyInUseException.class)
+    public ProblemDetail handleAuthUserEmailAlreadyInUseException(AuthUserEmailAlreadyInUseException e) {
+        log.error(e.getMessage(), e);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problemDetail.setTitle("Email Already In Use");
+        problemDetail.setDetail("The provided email address is already in use.");
+        problemDetail.setType(URI.create("/errors/email-already-in-use"));
+        return problemDetail;
+    }
 
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ProblemDetail handleAuthorizationDeniedException(AuthorizationDeniedException e) {
@@ -86,6 +75,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         problemDetail.setTitle("Forbidden");
         problemDetail.setDetail(e.getMessage());
         problemDetail.setType(URI.create("/errors/forbidden"));
+        return problemDetail;
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleException(Exception e) {
+        log.error(e.getMessage(), e);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        problemDetail.setTitle("Internal Server Error");
+        problemDetail.setDetail("An unexpected internal error occurred.");
+        problemDetail.setType(URI.create("/errors/internal"));
         return problemDetail;
     }
 }

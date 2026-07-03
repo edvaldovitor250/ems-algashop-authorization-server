@@ -74,6 +74,12 @@ public class AuthUser extends AbstractAuditableAggregateRoot<AuthUser> {
 		this.type = type;
 	}
 
+	public void anonymize() {
+		this.name = "Anonymized User";
+		this.email = "anonymized-" + this.id + "@deleted.local";
+		this.enabled = false;
+	}
+
 	private void setId(UUID id) {
 		Objects.requireNonNull(id);
 		this.id = id;

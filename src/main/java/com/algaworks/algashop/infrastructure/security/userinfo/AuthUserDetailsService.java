@@ -1,5 +1,14 @@
 package com.algaworks.algashop.infrastructure.security.userinfo;
 
+import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUser;
+import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
 @Service
 @RequiredArgsConstructor
 public class AuthUserDetailsService implements UserDetailsService {
@@ -8,11 +17,10 @@ public class AuthUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return AuthUser authUser = authUserRepository.findByEmail(email)
+        AuthUser authUser = authUserRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return org.springframework.security.core.userdetails.User.withUsername(
-                authUser.getEmail())
+        return User.withUsername(authUser.getEmail())
                 .password(authUser.getPassword())
                 .authorities("USER")
                 .build();

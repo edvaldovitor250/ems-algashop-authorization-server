@@ -1,3 +1,14 @@
+package com.algaworks.algashop.authorizationserver.application.user.management;
+
+import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUserType;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,27 +24,5 @@ public class AuthUserInput {
 
     @NotNull
     private AuthUserType type;
-}
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AuthUserOutput {
-
-    private UUID id;
-    private String name;
-    private String email;
-    private AuthUserType type;
-    private boolean enabled;
-
-    public static AuthUserOutput from(AuthUser user) {
-        return AuthUserOutput.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .type(user.getType())
-                .enabled(user.isEnabled())
-                .build();
-    }
 }
