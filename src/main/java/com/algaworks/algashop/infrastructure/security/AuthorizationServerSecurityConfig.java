@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
@@ -18,6 +19,7 @@ import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class AuthorizationServerSecurityConfig {
 
@@ -30,6 +32,7 @@ public class AuthorizationServerSecurityConfig {
 		var authorizationServer = new OAuth2AuthorizationServerConfigurer();
 
 		http.securityMatcher(authorizationServer.getEndpointsMatcher())
+				.cors(Customizer.withDefaults())
 				.with(authorizationServer, configurer ->
 						configurer.oidc(oidc -> oidc
 								.logoutEndpoint(logout ->
@@ -55,7 +58,7 @@ public class AuthorizationServerSecurityConfig {
 						.requestMatchers("/actuator/health/**").permitAll()
 						.anyRequest().authenticated())
 				.csrf(csrf -> csrf.disable())
-				.cors(cors -> cors.disable())
+				.cors(Customizer.withDefaults())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
 
