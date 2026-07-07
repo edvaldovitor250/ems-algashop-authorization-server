@@ -6,6 +6,7 @@ DELETE FROM oauth2_authorization_consent;
 DELETE FROM spring_session_attributes;
 DELETE FROM spring_session;
 DELETE FROM auth_user_type_client_scope;
+DELETE FROM auth_user_type_client_allowed;
 
 
 INSERT INTO auth_user (id, email, password, name, version, "type", enabled, created_at, last_modified_date)
@@ -41,6 +42,10 @@ INSERT INTO auth_user_type_client_scope (auth_user_type, client_id, scope) VALUE
 ('OPERATOR', 'algashop-admin-web', 'customers:read'),
 ('OPERATOR', 'algashop-admin-web', 'shopping-carts:read'),
 ('OPERATOR', 'algashop-admin-web', 'users:read')
-set session_replication_role = 'origin';
+
+INSERT INTO auth_user_type_client_allowed (auth_user_type, client_id)
+VALUES ('MANAGER', 'algashop-admin-web'), 
+       ('OPERATOR', 'algashop-admin-web'),
+       ('CUSTOMER', 'algashop-ecommerce-web');
 
 set session_replication_role = 'origin';
