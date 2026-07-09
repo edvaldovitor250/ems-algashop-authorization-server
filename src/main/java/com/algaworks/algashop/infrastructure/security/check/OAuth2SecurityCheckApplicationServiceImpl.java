@@ -20,6 +20,15 @@ public class OAuth2SecurityCheckApplicationServiceImpl
 	private static final String SCOPE_USERS_WRITE = "SCOPE_users:write";
 	private static final String ROLE_MANAGER = "ROLE_" + AuthUserType.MANAGER.name();
 
+
+	@Override
+	public boolean canOrderFor(UUID customerId){
+		if(customerId == null){
+			return false;
+		}
+		return 
+	}
+
 	@Override
 	public UUID getAuthenticatedUserId() {
 		if (isMachineAuthenticated()) {
