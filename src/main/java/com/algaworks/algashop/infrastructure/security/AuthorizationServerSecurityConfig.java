@@ -1,5 +1,6 @@
 package com.algaworks.algashop.authorizationserver.infrastructure.security;
 
+import com.algaworks.algashop.authorizationserver.infrastructure.security.AlgaShopSecurityProperties;
 import com.algaworks.algashop.authorizationserver.infrastructure.security.code.DelegatingAuthorizationCodeRequestValidator;
 import com.algaworks.algashop.authorizationserver.infrastructure.security.oidc.OidcUserInfoMapper;
 import lombok.RequiredArgsConstructor;
@@ -99,7 +100,9 @@ public class AuthorizationServerSecurityConfig {
 								"/js/**", "/img/**", "/favicon.ico").permitAll()
 						.anyRequest().authenticated()
 				)
-				.formLogin(c -> c.loginPage("/login").permitAll());
+				.formLogin(c -> c.loginPage("/login")
+				.defaultSuccessUrl(properties.getDefaultRedirectUri())
+				.permitAll());
 		return http.build();
 	}
 
