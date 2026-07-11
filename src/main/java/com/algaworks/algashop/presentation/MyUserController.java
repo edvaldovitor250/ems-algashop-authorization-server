@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 @RequestMapping("/api/v1/users/me")
@@ -16,11 +19,20 @@ public class MyUserController {
 
 	private final SecurityCheckApplicationService securityCheck;
 	private final AuthUserQueryService queryService;
+	private final PasswordChangeRequestService passwordChangeRequestService;
 
 	@GetMapping
 	@SecurityAnnotations.CanAccessOwnProfile
 	public AuthUserOutput getMe() {
 		return queryService.findById(securityCheck.getAuthenticatedUserId());
 	}
+
+	@PostMapping("/password-change")
+	@SecurityAnnotations.CanAccessOwnProfile
+	public String requestPasswordChange() {
+		passwordChangeRequestService.requestPasswordChange(securityCheck.getAuthenticatedUserId());
+		return "Password change request sent successfully.";
+	}
+	
 
 }
