@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -28,6 +30,11 @@ public class AuthUser extends AbstractAuditableAggregateRoot<AuthUser> {
 	private String password;
 	private String name;
 	private boolean enabled;
+	private boolean emailVerified;
+
+	private String verificationToken;
+
+	private OffsetDateTime verificationTokenExpirationDate;
 
 	@Enumerated(EnumType.STRING)
 	private AuthUserType type;
@@ -35,24 +42,35 @@ public class AuthUser extends AbstractAuditableAggregateRoot<AuthUser> {
 	public static AuthUser brandNew(String email,
 	                                String name,
 	                                AuthUserType type,
-	                                String passwordHash) {
+	                                AuthUserPasswordManager passwordManager) {
 		AuthUser user = new AuthUser();
 
 		user.setId(IdGenerator.generateTimeBasedUUID());
 		user.setEmail(email);
 		user.setName(name);
 		user.setType(type);
-		user.setPassword(passwordHash);
+		user.setPassword(passwordManager.encrypt(passwordManager.generates()));
 		user.setEnabled(true);
+		user.setEmailVerified(false);
 
 		return user;
 	}
 
-	public void setPassword(String password) {
-		if (StringUtils.isBlank(password)) {
-			throw new IllegalArgumentException();
-		}
-		this.password = password;
+	public String generateVerificationToken(Duration expiresIn, VerificationTokenHasher hasher) {
+		String plainToken = hasher.generate();
+		this.verificationToken = hasher.hash(plainToken);
+		this.verificationTokenExpirationDate = OffsetDateTime.now().plus(expiresIn);
+		return plainToken;
+	}
+
+	public boolean isDisabled() {
+		return !isEmailVerified() || !isEnabled();
+	}
+
+	public void anonymize() {
+		this.setName("Anonymized User");
+		this.setEmail("anonymized-" + this.id + "@deleted.local");
+		this.setEnabled(false);
 	}
 
 	public void setName(String name) {
@@ -74,10 +92,11 @@ public class AuthUser extends AbstractAuditableAggregateRoot<AuthUser> {
 		this.type = type;
 	}
 
-	public void anonymize() {
-		this.name = "Anonymized User";
-		this.email = "anonymized-" + this.id + "@deleted.local";
-		this.enabled = false;
+	private void setPassword(String password) {
+		if (StringUtils.isBlank(password)) {
+			throw new IllegalArgumentException();
+		}
+		this.password = password;
 	}
 
 	private void setId(UUID id) {
@@ -90,5 +109,9 @@ public class AuthUser extends AbstractAuditableAggregateRoot<AuthUser> {
 			throw new IllegalArgumentException();
 		}
 		this.email = email;
+	}
+
+	private void setEmailVerified(boolean emailVerified) {
+		this.emailVerified = emailVerified;
 	}
 }
