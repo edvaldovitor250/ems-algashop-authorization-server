@@ -23,6 +23,8 @@ public class PasswordManagementApplicationService {
 	private final AuthUserPasswordManager passwordManager;
 	private final VerificationTokenHasher tokenHasher;
 
+	private final AuthUserMailSender authUserMailSender;
+
 	public void changePasswordWithToken(String plainToken, String newPlainPassword) {
 		String hash = tokenHasher.hash(plainToken);
 		AuthUser authUser = authUserRepository.findByVerificationToken(hash)
@@ -44,7 +46,8 @@ public class PasswordManagementApplicationService {
 		String plainToken = authUser.generateVerificationToken(
 				userAccountProperties.getToken().getPasswordResetTtl(), tokenHasher);
 
-		System.out.println("Plain token: " + plainToken);
+				authUserMailSender.sendPasswordChangeEmail(authUser, plainToken);
+
 
 		authUserRepository.save(authUser);
 	}
