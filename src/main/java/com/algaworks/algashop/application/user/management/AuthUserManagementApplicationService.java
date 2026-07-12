@@ -1,19 +1,14 @@
 package com.algaworks.algashop.authorizationserver.application.user.management;
 
-import com.algaworks.algashop.authorizationserver.application.security.SecurityChecks;
-import com.algaworks.algashop.authorizationserver.application.user.UserAccountProperties;
+import com.algaworks.algashop.authorizationserver.application.security.SecurityCheckApplicationService;
 import com.algaworks.algashop.authorizationserver.application.user.query.AuthUserNotFoundException;
 import com.algaworks.algashop.authorizationserver.application.user.query.AuthUserOutput;
 import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUser;
 import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUserPasswordManager;
 import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUserRepository;
-import com.algaworks.algashop.authorizationserver.domain.model.user.VerificationTokenHasher;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.parameters.P;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -24,12 +19,8 @@ import java.util.UUID;
 public class AuthUserManagementApplicationService {
 
 	private final AuthUserRepository authUserRepository;
-	private final SecurityChecks securityCheck;
-	private final UserAccountProperties userAccountProperties;
+	private final SecurityCheckApplicationService securityCheck;
 	private final AuthUserPasswordManager passwordManager;
-	private final VerificationTokenHasher tokenHasher;
-
-	private final MailSenderApplicationService mailSenderService;
 
 	public AuthUserOutput create(AuthUserInput input) {
 		if (!securityCheck.canRegisterUserOfType(input.getType())) {
@@ -47,11 +38,6 @@ public class AuthUserManagementApplicationService {
 				passwordManager
 		);
 
-		String plainToken = user.generateVerificationToken(userAccountProperties.getToken().getActivationTtl(),
-				tokenHasher);
-
-		authUserMailSender.sendActivationEmail(user, plainToken);
-
 		return AuthUserOutput.from(authUserRepository.save(user));
 	}
 
@@ -66,6 +52,27 @@ public class AuthUserManagementApplicationService {
 		user.setEnabled(input.isEnabled());
 
 		return AuthUserOutput.from(authUserRepository.save(user));
+	}
+
+	public AuthUserOutput updateOwnProfile(UUID authenticatedUserId, MyUserUpdateInput input) {
+		AuthUser user = authUserRepository.findById(authenticatedUserId)
+				.orElseThrow(() -> new AuthUserNotFoundException(authenticatedUserId));
+
+		user.setName(input.getName());
+
+		return AuthUserOutput.from(authUserRepository.save(user));
+	}
+
+	public void deleteOwnProfile(UUID authenticatedUserId) {
+		AuthUser user = authUserRepository.findById(authenticatedUserId)
+				.orElseThrow(() -> new AuthUserNotFoundException(authenticatedUserId));
+
+		if (!securityCheck.canDeleteOwnProfile()) {
+			throw new AccessDeniedException("Cannot delete own profile");
+		}
+
+		user.anonymize();
+		authUserRepository.save(user);
 	}
 
 	private void verifyCanEditUser(AuthUser authUser, AuthUserUpdateInput input) {

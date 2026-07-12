@@ -19,15 +19,7 @@ public class OAuth2SecurityCheckApplicationServiceImpl
 
 	private static final String SCOPE_USERS_WRITE = "SCOPE_users:write";
 	private static final String ROLE_MANAGER = "ROLE_" + AuthUserType.MANAGER.name();
-
-
-	@Override
-	public boolean canOrderFor(UUID customerId){
-		if(customerId == null){
-			return false;
-		}
-		return 
-	}
+	private static final String ROLE_CUSTOMER = "ROLE_" + AuthUserType.CUSTOMER.name();
 
 	@Override
 	public UUID getAuthenticatedUserId() {
@@ -38,7 +30,7 @@ public class OAuth2SecurityCheckApplicationServiceImpl
 
 		try {
 			return UUID.fromString(jwt.getSubject());
-		} catch (IllegalAccessError e) {
+		} catch (IllegalArgumentException e) {
 			log.error("Invalid user ID in JWT subject: {}", jwt.getSubject(), e);
 			throw new AccessDeniedException("Invalid user ID in JWT subject");
 		}
@@ -69,6 +61,11 @@ public class OAuth2SecurityCheckApplicationServiceImpl
 	@Override
 	public boolean canAccessOwnProfile() {
 		return this.isAuthenticated() && !isMachineAuthenticated();
+	}
+
+	@Override
+	public boolean canDeleteOwnProfile() {
+		return canAccessOwnProfile() && hasAuthority(ROLE_CUSTOMER);
 	}
 
 	@Override

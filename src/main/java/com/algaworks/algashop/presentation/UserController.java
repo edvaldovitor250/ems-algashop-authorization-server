@@ -45,7 +45,7 @@ public class UserController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@SecurityAnnotations.CanWriteUsers
 	public void delete(@PathVariable UUID userId) {
-		managementService.anonymize(userId);
+		managementService.delete(userId);
 	}
 
 	@PostMapping

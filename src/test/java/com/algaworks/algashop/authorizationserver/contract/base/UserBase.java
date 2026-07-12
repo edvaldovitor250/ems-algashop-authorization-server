@@ -1,11 +1,13 @@
 package com.algaworks.algashop.authorizationserver.contract.base;
 
+import com.algaworks.algashop.authorizationserver.application.security.SecurityCheckApplicationService;
 import com.algaworks.algashop.authorizationserver.application.user.management.AuthUserManagementApplicationService;
 import com.algaworks.algashop.authorizationserver.application.user.query.AuthUserOutput;
 import com.algaworks.algashop.authorizationserver.application.user.query.AuthUserQueryService;
 import com.algaworks.algashop.authorizationserver.application.user.query.AuthUserNotFoundException;
 import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUserType;
 import com.algaworks.algashop.authorizationserver.presentation.UserController;
+import com.algaworks.algashop.authorizationserver.presentation.MyUserController;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
@@ -20,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
-@WebMvcTest(controllers = UserController.class)
+@WebMvcTest(controllers = {UserController.class, MyUserController.class})
 public class UserBase {
 
 	@Autowired
@@ -31,6 +33,9 @@ public class UserBase {
 
 	@MockitoBean
 	private AuthUserManagementApplicationService managementService;
+
+	@MockitoBean
+	private SecurityCheckApplicationService securityCheck;
 
 	public static final UUID VALID_USER_ID = UUID.fromString("52601e34-b849-4f52-b7f5-43f38a3fa83a");
 
@@ -63,9 +68,23 @@ public class UserBase {
 		Mockito.when(queryService.list(Mockito.any(), Mockito.any()))
 				.thenReturn(new PageImpl<>(List.of(validUser)));
 
-		Mockito.doNothing().when(managementService).anonymize(VALID_USER_ID);
+		Mockito.doNothing().when(managementService).delete(VALID_USER_ID);
 
-		Mockito.doNothing().when(managementService).anonymize(NOT_FOUND_USER_ID);
+		Mockito.doNothing().when(managementService).delete(NOT_FOUND_USER_ID);
+
+		Mockito.when(managementService.updateOwnProfile(Mockito.any(UUID.class), Mockito.any()))
+				.thenReturn(validUser);
+
+		Mockito.doNothing().when(managementService).deleteOwnProfile(Mockito.any(UUID.class));
+
+		Mockito.when(securityCheck.getAuthenticatedUserId())
+				.thenReturn(VALID_USER_ID);
+
+		Mockito.when(securityCheck.canAccessOwnProfile())
+				.thenReturn(true);
+
+		Mockito.when(securityCheck.canDeleteOwnProfile())
+				.thenReturn(true);
 	}
 
 }

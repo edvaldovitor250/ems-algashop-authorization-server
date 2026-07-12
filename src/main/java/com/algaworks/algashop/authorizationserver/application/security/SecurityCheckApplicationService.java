@@ -2,7 +2,7 @@ package com.algaworks.algashop.authorizationserver.application.security;
 
 import java.util.UUID;
 
-import com.algaworks.algashop.authorizationserver.domain.model.AuthUserType;
+import com.algaworks.algashop.authorizationserver.domain.model.user.AuthUserType;
 
 public interface SecurityCheckApplicationService {
 
@@ -11,7 +11,8 @@ public interface SecurityCheckApplicationService {
     boolean isMachineAuthenticated();
     boolean canAccessOwnProfile();
     boolean canRegisterUserOfType(AuthUserType userType);
-    boolean  canEditUserOfType(AuthUserType editType, UUID editUserId);
+    boolean canEditUser(AuthUserType editType, UUID editUserId);
     boolean canChangeUserType(AuthUserType currentType, AuthUserType newType);
+    boolean canDeleteOwnProfile();
 
 }

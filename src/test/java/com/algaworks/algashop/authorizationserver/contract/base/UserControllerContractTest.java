@@ -98,4 +98,61 @@ class UserControllerContractTest extends UserBase {
 				);
 	}
 
+	@Test
+	void getMyProfileContract() {
+		RestAssuredMockMvc.given()
+				.accept(MediaType.APPLICATION_JSON_VALUE)
+			.when()
+				.get("/api/v1/users/me")
+			.then()
+				.assertThat()
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.statusCode(HttpStatus.OK.value())
+				.body(
+						"id", Matchers.is(VALID_USER_ID.toString()),
+						"name", Matchers.is("John Doe"),
+						"email", Matchers.is("john@example.com"),
+						"type", Matchers.is("CUSTOMER"),
+						"enabled", Matchers.is(true)
+				);
+	}
+
+	@Test
+	void updateMyProfileContract() {
+		String jsonInput = """
+		{
+		  "name": "Jane Doe"
+		}
+		""";
+
+		RestAssuredMockMvc.given()
+				.accept(MediaType.APPLICATION_JSON_VALUE)
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.body(jsonInput)
+			.when()
+				.put("/api/v1/users/me")
+			.then()
+				.assertThat()
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+				.statusCode(HttpStatus.OK.value())
+				.body(
+						"id", Matchers.is(VALID_USER_ID.toString()),
+						"name", Matchers.is("John Doe"),
+						"email", Matchers.is("john@example.com"),
+						"type", Matchers.is("CUSTOMER"),
+						"enabled", Matchers.is(true)
+				);
+	}
+
+	@Test
+	void deleteMyProfileContract() {
+		RestAssuredMockMvc.given()
+				.contentType(MediaType.APPLICATION_JSON_VALUE)
+			.when()
+				.delete("/api/v1/users/me")
+			.then()
+				.assertThat()
+				.statusCode(HttpStatus.NO_CONTENT.value());
+	}
+
 }
