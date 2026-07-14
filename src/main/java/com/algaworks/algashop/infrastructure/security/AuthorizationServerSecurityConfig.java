@@ -93,7 +93,7 @@ public class AuthorizationServerSecurityConfig {
 	@Bean
 	@Order(3)
 	public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) {
-		http.securityMatcher("/api/**")
+		http.securityMatcher("/api/**","/actuator/**")
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/actuator/health/**").permitAll()
 						.anyRequest().authenticated())
